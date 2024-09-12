@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS members(
+	id 		INT 	PRIMARY KEY AUTO_INCREMENT ,
+	name 	VARCHAR NOT NULL,
+	birth 	DATE 	NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS resumes(
+	id 			INT 		PRIMARY KEY AUTO_INCREMENT ,
+	typ 		INT 		NOT NULL,
+	member_id 	INT 		NOT NULL,
+	ym 			DATE 		NOT NULL,
+	content 	VARCHAR 	NOT NULL
+);
+
+ALTER TABLE resumes ADD FOREIGN KEY (member_id) REFERENCES members(id);
+
