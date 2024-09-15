@@ -2,6 +2,7 @@ package com.resumejdbc.controller;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.resumejdbc.entity.Member;
+import com.resumejdbc.request.MemberSearchCriteria;
+import com.resumejdbc.result.Result;
 import com.resumejdbc.service.MemberService;
 
 import jakarta.servlet.http.HttpSession;
@@ -23,56 +26,112 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class MemberController {
 
-	//ビジネスロジック用
+	//業務ロジック用
 	private MemberService memberSvc;
 
 	//HTTPセッション用
 	private HttpSession session;
 	
+	/**
+	 * コンストラクタ
+	 * @param memberSvc 業務ロジック（会員サービス）
+	 * @param session HTTPセッション
+	 */
 	public MemberController(MemberService memberSvc, HttpSession session) {
 		this.memberSvc = memberSvc;
 		this.session = session;
 	}
 
+	/**
+	 * 初期画面
+	 * @param criteria 検索条件
+	 * @param model モデル
+	 * @return
+	 */
 	@GetMapping("/")
-	public String memberList(Model model) {
+	public String memberList(@ModelAttribute("criteria") MemberSearchCriteria criteria, Model model) {
 		
+		//HTTPセッションに保存していた情報を削除する
 		session.removeAttribute("dateFrom");
 		session.removeAttribute("dateTo");
 
 		return "memberList";
 	}
 
+	/**
+	 * 会員検索の要求
+	 * @param criteria
+	 * @param validResult
+	 * @param model
+	 * @return
+	 */
 	@GetMapping("/searchMember")
-	public String searchList(
-			@RequestParam(name = "dateFrom", required = false) LocalDate from, 
-			@RequestParam(name = "dateTo", required = false) LocalDate to, 
-			Model model) {
-		//検索条件をHTTPセッションに保持する
-		session.setAttribute("dateFrom", from);
-		session.setAttribute("dateTo", to);
-		
-		List<Member> members = this.memberSvc.findByBirth(from, to);
+	public String searchList(@Validated @ModelAttribute("criteria") MemberSearchCriteria criteria, 
+			BindingResult validResult, Model model) {
 
-		model.addAttribute("dateFrom", from);
-		model.addAttribute("dateTo", to);
-		model.addAttribute("members", members);
+		if(! validResult.hasErrors()) {
+			//検索条件をHTTPセッションに保持する
+			session.setAttribute("dateFrom", criteria.getDateFrom());
+			session.setAttribute("dateTo", criteria.getDateTo());
+			session.setAttribute("isSearch", true);
+
+			//検索条件を画面に再表示するためにmodelに設定する
+			model.addAttribute("dateFrom", criteria.getDateFrom());
+			model.addAttribute("dateTo", criteria.getDateTo());
+			
+			List<Member> members = new ArrayList<>();
+			try {
+				//データ検索
+				members = this.memberSvc.findByBirth(criteria);
+				model.addAttribute("members", members);
+			}catch(Exception ex) {
+				//例外の始末をする
+				model.addAttribute("errmsg", ex.getMessage());
+				//空の情報を渡す
+				model.addAttribute("members", new ArrayList<Member>());
+			}
+		}
 		
 		return "memberList";
 	}
 
+	/**
+	 * 会員登録画面
+	 * @param request　リクエスト
+	 * @param model
+	 * @return
+	 */
 	@GetMapping("/newMember")
 	public String newMember(@ModelAttribute("member") Member request, Model model) {
 		
 		return "newMember";
 	}
 	
+	/**
+	 * 会員登録の要求
+	 * @param request リクエスト
+	 * @param validResult バリデーション結果
+	 * @param model モデル
+	 * @return
+	 */
 	@PostMapping("/insertMember")
 	public String insertMember(@Validated @ModelAttribute("member") Member request, 
 			BindingResult validResult, Model model) {
 
 		if(! validResult.hasErrors()) {
-			memberSvc.insertMember(request);
+			try {
+				//データ挿入
+				Result result = memberSvc.insertMember(request);
+				if(! result.isOk()) {
+					//業務チェックのNG
+					model.addAttribute("errmsg", result.getErrMsg());
+					return "newMember";
+				}
+			}catch(Exception ex) {
+				//例外の始末をする
+				model.addAttribute("errmsg", ex.getMessage());
+				return "newMember";
+			}
 		}else {
 			return "newMember";
 		}
@@ -80,22 +139,53 @@ public class MemberController {
 		return "redirect:/backToMemberList";
 	}
 	
+	/**
+	 * 会員編集画面
+	 * @param id ID
+	 * @param model モデル
+	 * @return
+	 */
 	@GetMapping("/editMember")
 	public String editMember(@RequestParam("id") Integer id, Model model) {
-		Member member = this.memberSvc.findById(id);
-		
-		//初期表示するためにModelにmemberを設定する
-		model.addAttribute("member", member);
+		try {
+			Member member = this.memberSvc.findById(id);
+			
+			//初期表示するためにModelにmemberを設定する
+			model.addAttribute("member", member);
+		}catch(Exception ex) {
+			//例外の始末をする
+			model.addAttribute("errmsg", ex.getMessage());
+			//空の情報を渡す
+			model.addAttribute("member", new Member());
+		}
 		
 		return "editMember";
 	}
 
+	/**
+	 * 会員編集の要求
+	 * @param request リクエスト
+	 * @param validResult バリデーション結果
+	 * @param model モデル
+	 * @return
+	 */
 	@PostMapping("/updateMember")
 	public String updateMember(@Validated @ModelAttribute("member") Member request, 
 			BindingResult validResult, Model model) {
 
 		if(! validResult.hasErrors()) {
-			memberSvc.updateMember(request);
+			try {
+				Result result = memberSvc.updateMember(request);
+				if(! result.isOk()) {
+					//業務チェックのNG
+					model.addAttribute("errmsg", result.getErrMsg());
+					return "newMember";
+				}
+			}catch(Exception ex) {
+				//例外の始末をする
+				model.addAttribute("errmsg", ex.getMessage());
+				return "newMember";
+			}
 		}else {
 			return "newMember";
 		}
@@ -103,16 +193,41 @@ public class MemberController {
 		return "redirect:/backToMemberList";
 	}
 	
+	/**
+	 * 会員削除の要求
+	 * @param id ID
+	 * @param model モデル
+	 * @param redirectAttributes リダイレクト用モデル
+	 * @return
+	 */
 	@PostMapping("/deleteMember")
-	public String deleteMember(@RequestParam("id") Integer id, RedirectAttributes redirectAttrs) {
+	public String deleteMember(@RequestParam("id") Integer id, Model model, RedirectAttributes redirectAttributes) {
 
-		memberSvc.deleteMember(id);
+		try {
+			memberSvc.deleteMember(id);
+		}catch(Exception ex) {
+			//例外の始末をする(リダイレクト先のModelに情報を引き継ぐ)
+			redirectAttributes.addFlashAttribute("errmsg", ex.getMessage());
+		}
 
 		return "redirect:/backToMemberList";
 	}
 
+	/**
+	 * 会員一覧へのリダイレクト
+	 * @param model モデル
+	 * @param redirectAttributes リダイレクト用モデル
+	 * @return
+	 */
 	@GetMapping("/backToMemberList")
-	public String backToMemberList(RedirectAttributes redirectAttributes) {
+	public String backToMemberList(Model model, RedirectAttributes redirectAttributes) {
+		
+		Boolean isSearch = (Boolean) session.getAttribute("isSearch");
+		if(Objects.isNull(isSearch) || !isSearch) {
+			//検索が実施されていない状況なら初期画面に遷移する
+			return "redirect:/";
+		}
+
 		//HTTPセッションに保存していた検索条件を取り出す
 		LocalDate from = (LocalDate) session.getAttribute("dateFrom");
 		LocalDate to = (LocalDate) session.getAttribute("dateTo");
@@ -131,6 +246,10 @@ public class MemberController {
 		//取り出した検索条件をクエリパラメータに関連付けする
 		redirectAttributes.addAttribute("dateFrom", strFrom);
 		redirectAttributes.addAttribute("dateTo", strTo);
+		if(Objects.nonNull(model.getAttribute("errmsg"))) {
+			//Modelに情報を引き継ぐ
+			redirectAttributes.addFlashAttribute("errmsg", model.getAttribute("errmsg"));
+		}
 		
 		//クエリパラメータ付きのURLでリダイレクトする
 		return "redirect:/searchMember?dateFrom={dateFrom}&dateTo={dateTo}";

@@ -14,11 +14,21 @@ public class ResumeJdbcRepository {
 
 	private JdbcTemplate template;
 	
+	/**
+	 * コンストラクタ
+	 * @param template JdbcTemplate
+	 */
 	public ResumeJdbcRepository(JdbcTemplate template) {
 		this.template = template;
 	}
 
-	public List<Resume> findByMemberId(Integer id) {
+	/**
+	 * 会員IDを検索条件にresumesテーブルを検索する
+	 * @param id ID
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Resume> findByMemberId(Integer id) throws Exception {
 		List<Object> args = new ArrayList<>();
 		args.add(id);
 		
@@ -31,7 +41,13 @@ public class ResumeJdbcRepository {
 		return resumes;
 	}
 
-	public Resume findById(Integer id) {
+	/**
+	 * IDを検索条件にresumesテーブルを検索する
+	 * @param id
+	 * @return
+	 * @throws Exception
+	 */
+	public Resume findById(Integer id) throws Exception {
 		List<Object> args = new ArrayList<>();
 		args.add(id);
 		
@@ -48,7 +64,12 @@ public class ResumeJdbcRepository {
 		return resume;
 	}
 	
-	public void insert(Resume resume) {
+	/**
+	 * レコード挿入
+	 * @param resume 経歴エンティティ
+	 * @throws Exception
+	 */
+	public void insert(Resume resume) throws Exception {
 		List<Object> args = new ArrayList<>();
 		//新規登録
 		args.add(resume.getTyp());
@@ -60,7 +81,12 @@ public class ResumeJdbcRepository {
 				args.toArray());
 	}
 	
-	public void update(Resume resume) {
+	/**
+	 * レコード更新
+	 * @param resume 経歴エンティティ
+	 * @throws Exception
+	 */
+	public void update(Resume resume) throws Exception {
 		List<Object> args = new ArrayList<>();
 		//更新
 		args.add(resume.getTyp());
@@ -72,7 +98,12 @@ public class ResumeJdbcRepository {
 				args.toArray());
 	}
 	
-	public void delete(Integer id) {
+	/**
+	 * レコード削除
+	 * @param id ID
+	 * @throws Exception
+	 */
+	public void delete(Integer id) throws Exception {
 		List<Object> args = new ArrayList<>();
 		//削除
 		args.add(id);
@@ -81,7 +112,12 @@ public class ResumeJdbcRepository {
 				args.toArray());
 	}
 	
-	public void deleteByMemberId(Integer memberId) {
+	/**
+	 * 会員IDを条件にレコードを削除する
+	 * @param memberId 会員ID
+	 * @throws Exception
+	 */
+	public void deleteByMemberId(Integer memberId) throws Exception {
 		List<Object> args = new ArrayList<>();
 		//削除
 		args.add(memberId);

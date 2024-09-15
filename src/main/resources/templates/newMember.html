@@ -17,6 +17,10 @@
 				会員の追加
 			</div>
 			<div class="card-body">
+				<th:block th:if="${errmsg} != null">
+					<div class="p-2 bg-danger-subtle rounded-3 text-danger" th:text="${errmsg}">
+					</div>
+				</th:block>
 				<form th:action="@{/insertMember}" method="post" th:object="${member}">
 					<div class="row mt-1">
 						<div class="col-2">
@@ -39,6 +43,18 @@
 							<span class="text-danger"
 							      th:if="${#fields.hasErrors('birth')}"
 							      th:errors="*{birth}" >
+							</span>
+						</div>
+					</div>
+					<div class="row mt-1">
+						<div class="col-2">
+							<label class="col-form-label">メアド<span class="badge text-bg-danger">必須</span></label>
+						</div>
+						<div class="col-auto">
+							<input type="email" class="form-control" th:field="*{email}">
+							<span class="text-danger"
+							      th:if="${#fields.hasErrors('email')}"
+							      th:errors="*{email}" >
 							</span>
 						</div>
 					</div>

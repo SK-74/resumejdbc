@@ -21,6 +21,10 @@ public class Member {
 	@DateTimeFormat(pattern = "yyyy-MM-dd") //inputタグに日付を反映させるために形式を整える
 	private LocalDate birth;
 
+	/** メアド */
+	@NotEmpty(message="{err.msg.required}")
+	private String email;
+
 	public Integer getId() {
 		return id;
 	}
@@ -43,6 +47,14 @@ public class Member {
 
 	public void setBirth(LocalDate birth) {
 		this.birth = birth;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 }

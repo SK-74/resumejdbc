@@ -21,53 +21,106 @@ import com.resumejdbc.service.ResumeService;
 
 @Controller
 public class ResumeController {
-	
+
+	//業務ロジック用
 	private MemberService memberSvc;
-	
+
+	//業務ロジック用
 	private ResumeService resumeSvc;
 
+	/**
+	 * コンストラクタ
+	 * @param memberSvc 業務ロジック（会員サービス）
+	 * @param resumeSvc 業務ロジック（経歴サービス）
+	 */
 	public ResumeController(MemberService memberSvc, ResumeService resumeSvc) {
 		this.memberSvc = memberSvc;
 		this.resumeSvc = resumeSvc;
 	}
 	
+	/**
+	 * 経歴一覧
+	 * @param id ID
+	 * @param model モデル
+	 * @return
+	 */
 	@GetMapping("/resumeList")
 	public String resumeList(@RequestParam(name="id") Integer id, Model model){
-		Member member = this.memberSvc.findById(id);
-		List<Resume> resumes = new ArrayList<>();
-		if(Objects.nonNull(member)) {
-			resumes = this.resumeSvc.findByMemberId(member.getId());
+		try {
+			Member member = this.memberSvc.findById(id);
+			List<Resume> resumes = new ArrayList<>();
+			if(Objects.nonNull(member)) {
+				resumes = this.resumeSvc.findByMemberId(member.getId());
+			}
+	
+			model.addAttribute("member", member);
+			model.addAttribute("resumes", resumes);
+			model.addAttribute("age", this.memberSvc.getAge(member.getId()));
+		}catch(Exception ex) {
+			//例外の始末をする
+			model.addAttribute("errmsg", ex.getMessage());
+			//空の情報を渡す
+			model.addAttribute("member", new Member());
+			model.addAttribute("resumes", new ArrayList<Resume>());
 		}
-
-		model.addAttribute("member", member);
-		model.addAttribute("resumes", resumes);
 		
 		return "resumeList";
 	}
 
+	/**
+	 * 経歴追加画面
+	 * @param id ID
+	 * @param model モデル
+	 * @return
+	 */
 	@GetMapping("/newResume")
 	public String newResume(@RequestParam(name="id") Integer id, Model model){
-		Member member = this.memberSvc.findById(id);
-		
+		//初期表示用（hidden項目）の会員IDを設定する
 		Resume resume = new Resume();
 		resume.setMemberId(id);
-
-		model.addAttribute("member", member);
-		model.addAttribute("resume", resume);
+		
+		try {
+			Member member = this.memberSvc.findById(id);
+	
+			model.addAttribute("member", member);
+			model.addAttribute("resume", resume);
+		}catch(Exception ex) {
+			//例外の始末をする
+			model.addAttribute("errmsg", ex.getMessage());
+			//空の情報を渡す
+			model.addAttribute("member", new Member());
+			model.addAttribute("resume", new Resume());
+		}
 		
 		return "newResume";
 	}
 
+	/**
+	 * 経歴追加の要求
+	 * @param request リクエスト
+	 * @param validResult バリデーション結果
+	 * @param model モデル
+	 * @param redirectAttrs リダイレクト用モデル
+	 * @return
+	 */
 	@PostMapping("/insertResume")
 	public String insertResume(@Validated @ModelAttribute("resume") Resume request,
 			BindingResult validResult, Model model, RedirectAttributes redirectAttrs) {
 
-		if(! validResult.hasErrors()) {
-			resumeSvc.insertResume(request);
-		}else {
-			//元の画面にメンバー名を表示させるために設定する
-			Member member = this.memberSvc.findById(request.getMemberId());
-			model.addAttribute("member", member);
+		try {
+			if(! validResult.hasErrors()) {
+				resumeSvc.insertResume(request);
+			}else {
+				//元の画面にメンバー名を表示させるために設定する
+				Member member = this.memberSvc.findById(request.getMemberId());
+				model.addAttribute("member", member);
+				return "newResume";
+			}
+		}catch(Exception ex) {
+			//例外の始末をする
+			model.addAttribute("errmsg", ex.getMessage());
+			//空の情報を渡す
+			model.addAttribute("member", new Member());
 			return "newResume";
 		}
 
@@ -75,28 +128,58 @@ public class ResumeController {
 		return "redirect:/resumeList";
 	}
 
+	/**
+	 * 経歴編集画面
+	 * @param id ID
+	 * @param model モデル
+	 * @return
+	 */
 	@GetMapping("/editResume")
 	public String editResume(@RequestParam(name="id") Integer id, Model model){
-		Resume resume = this.resumeSvc.findById(id);
-
-		Member member = this.memberSvc.findById(resume.getMemberId());
-
-		model.addAttribute("member", member);
-		model.addAttribute("resume", resume);
+		try {
+			Resume resume = this.resumeSvc.findById(id);
+	
+			Member member = this.memberSvc.findById(resume.getMemberId());
+	
+			model.addAttribute("member", member);
+			model.addAttribute("resume", resume);
+		}catch(Exception ex) {
+			//例外の始末をする
+			model.addAttribute("errmsg", ex.getMessage());
+			//空の情報を渡す
+			model.addAttribute("member", new Member());
+			model.addAttribute("resume", new Resume());
+		}
 		
 		return "editResume";
 	}
 
+	/**
+	 * 経歴更新の要求
+	 * @param request リクエスト
+	 * @param validResult バリデーション結果
+	 * @param model モデル
+	 * @param redirectAttrs リダイレクト用モデル
+	 * @return
+	 */
 	@PostMapping("/updateResume")
 	public String updateResume(@Validated @ModelAttribute("resume") Resume request,
 			BindingResult validResult, Model model, RedirectAttributes redirectAttrs) {
 
-		if(! validResult.hasErrors()) {
-			resumeSvc.updateResume(request);
-		}else {
-			//元の画面にメンバー名を表示させるために設定する
-			Member member = this.memberSvc.findById(request.getMemberId());
-			model.addAttribute("member", member);
+		try {
+			if(! validResult.hasErrors()) {
+				resumeSvc.updateResume(request);
+			}else {
+				//元の画面にメンバー名を表示させるために設定する
+				Member member = this.memberSvc.findById(request.getMemberId());
+				model.addAttribute("member", member);
+				return "editResume";
+			}
+		}catch(Exception ex) {
+			//例外の始末をする
+			model.addAttribute("errmsg", ex.getMessage());
+			//空の情報を渡す
+			model.addAttribute("member", new Member());
 			return "editResume";
 		}
 
@@ -104,14 +187,26 @@ public class ResumeController {
 		return "redirect:/resumeList";
 	}
 	
+	/**
+	 * 経歴削除の要求
+	 * @param id ID
+	 * @param model モデル
+	 * @param redirectAttrs リダイレクト用モデル
+	 * @return
+	 */
 	@PostMapping("/deleteResume")
-	public String deleteResume(@RequestParam(name="id") Integer id, RedirectAttributes redirectAttrs) {
-		//redirect時にメンバーIDが必要なので削除前にresumeを取得
-		Resume resume = this.resumeSvc.findById(id);
-		
-		this.resumeSvc.deleteResume(id);
-
-		redirectAttrs.addAttribute("id", resume.getMemberId());
+	public String deleteResume(@RequestParam(name="id") Integer id, Model model, RedirectAttributes redirectAttrs) {
+		try {
+			//redirect時にメンバーIDが必要なので削除前にresumeを取得
+			Resume resume = this.resumeSvc.findById(id);
+			
+			this.resumeSvc.deleteResume(id);
+	
+			redirectAttrs.addAttribute("id", resume.getMemberId());
+		}catch(Exception ex) {
+			//例外の始末をする
+			model.addAttribute("errmsg", ex.getMessage());
+		}
 		return "redirect:/resumeList";
 	}
 

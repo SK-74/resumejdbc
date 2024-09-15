@@ -17,25 +17,36 @@
 				会員一覧
 			</div>
 			<div class="card-body">
-				<form th:action="@{/searchMember}" method="get">
-					<div class="row">
+				<th:block th:if="${errmsg} != null">
+					<div class="p-2 bg-danger-subtle rounded-3 text-danger" th:text="${errmsg}">
+					</div>
+				</th:block>
+				<form th:action="@{/searchMember}" method="get" th:object="${criteria}" >
+					<div class="row mt-1">
 						<h6>■検索条件</h6>
 					</div>
-					<div class="row">
+					<div class="row mt-1">
 						<div class="col-auto">
 							<label class="col-form-label">誕生日</label>
 						</div>
 						<div class="col-auto">
-							<input type="date" class="form-control" th:name="dateFrom" th:value="${dateFrom}">
+							<input type="date" class="form-control" th:name="dateFrom" th:value="*{dateFrom}">
 						</div>
 						<div class="col-auto pt-2"><span>～</span></div>
 						<div class="col-auto">
-							<input type="date" class="form-control" th:name="dateTo" th:value="${dateTo}">
+							<input type="date" class="form-control" th:name="dateTo" th:value="*{dateTo}">
 						</div>
 						<div class="col-auto">
 							<button type="submit" class="btn btn-primary">検索</button>
 						</div>
 					</div>
+					<div class="row">
+						<div class="col-auto">
+						  <span class="text-danger"
+						        th:if="${#fields.hasErrors('validDate')}" th:errors="*{validDate}" >
+						  </span>
+						</div>
+					</div>		
 				</form>					
 					
 				<div class="row mt-5">
@@ -44,7 +55,7 @@
 					</div>
 				</div>
 				<div class="row mt-2">
-					<div class="col-6">
+					<div class="col-7">
 						<th:block th:if="${members != null}">
 							<th:block th:if="${members.size() == 0}">
 								<h5>検索条件に一致するデータはありませんでした</h5>
@@ -55,6 +66,7 @@
 										<th>ID</th>
 										<th>名前</th>
 										<th>生年月日</th>
+										<th>メアド</th>
 										<th></th>
 									</tr>
 									<th:block th:each="member : ${members}" th:object="${member}">
@@ -62,6 +74,7 @@
 											<td class="text-center align-middle"><span th:text="|*{id}|"></span></td>
 											<td class="align-middle"><span th:text="|*{name}|"></span></td>
 											<td class="align-middle"><span th:text="|*{birth}|"></span></td>
+											<td class="align-middle"><span th:text="|*{email}|"></span></td>
 											<td class="text-center align-middle">
 												<form th:action="@{/deleteMember(id=*{id})}" method="post">
 													<a class="mr-1 btn btn-primary" th:href="@{/resumeList(id=*{id})}">経歴</a>

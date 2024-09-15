@@ -13,17 +13,34 @@ import com.resumejdbc.repository.ResumeJdbcRepository;
 @Service
 public class ResumeService {
 
+	//経歴リポジトリ
 	private ResumeJdbcRepository resumeRepo;
 	
+	/**
+	 * コンストラクタ
+	 * @param resumeRepo 経歴リポジトリ
+	 */
 	public ResumeService(ResumeJdbcRepository resumeRepo) {
 		this.resumeRepo = resumeRepo;
 	}
 	
-	public List<Resume> findByMemberId(Integer id) {
+	/**
+	 * 経歴検索
+	 * @param id ID
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Resume> findByMemberId(Integer id) throws Exception {
 		return this.resumeRepo.findByMemberId(id);
 	}
 
-	public Resume findById(Integer id) {
+	/**
+	 * 経歴検索
+	 * @param id ID
+	 * @return
+	 * @throws Exception
+	 */
+	public Resume findById(Integer id) throws Exception {
 		Resume resume = this.resumeRepo.findById(id);
 		//DBから取得した年月を画面用に型変換する
 		LocalDate2YearMonthConvertor convertor = new LocalDate2YearMonthConvertor();
@@ -32,8 +49,13 @@ public class ResumeService {
 		return resume;
 	}
 
+	/**
+	 * 経歴追加
+	 * @param resume 経歴エンティティ
+	 * @throws Exception
+	 */
 	@Transactional
-	public void insertResume(Resume resume) {
+	public void insertResume(Resume resume) throws Exception {
 		//画面からもらった年月をDB用に型変換する
 		YearMonth2DateConvertor convertor = new YearMonth2DateConvertor();
 		resume.setYm(convertor.convert(resume.getRequestYm()));
@@ -41,8 +63,13 @@ public class ResumeService {
 		this.resumeRepo.insert(resume);
 	}
 
+	/**
+	 * 経歴更新
+	 * @param resume 経歴エンティティ
+	 * @throws Exception
+	 */
 	@Transactional
-	public void updateResume(Resume resume) {
+	public void updateResume(Resume resume) throws Exception {
 		//画面からもらった年月をDB用に型変換する
 		YearMonth2DateConvertor convertor = new YearMonth2DateConvertor();
 		resume.setYm(convertor.convert(resume.getRequestYm()));
@@ -50,8 +77,13 @@ public class ResumeService {
 		this.resumeRepo.update(resume);
 	}
 	
+	/**
+	 * 経歴削除
+	 * @param id ID
+	 * @throws Exception
+	 */
 	@Transactional
-	public void deleteResume(Integer id) {
+	public void deleteResume(Integer id) throws Exception {
 		this.resumeRepo.delete(id);
 	}
 

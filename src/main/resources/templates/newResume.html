@@ -17,6 +17,10 @@
 				経歴の追加
 			</div>
 			<div class="card-body">
+				<th:block th:if="${errmsg} != null">
+					<div class="p-2 bg-danger-subtle rounded-3 text-danger" th:text="${errmsg}">
+					</div>
+				</th:block>
 				<div class="row mt-3">
 					<p class="h4" th:text="|${member.name}|"></p>
 				</div>
