@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -22,10 +23,10 @@
 					</div>
 				</th:block>
 				<div class="row mt-3">
-					<p class="h4" th:text="|${member.name}|"></p>
+					<p class="h4" th:text="|${memberResume.name}|"></p>
 				</div>
-				<form th:action="@{/updateResume}" method="post" th:object="${resume}">
-					<input type="hidden" th:field="*{id}">
+				<form th:action="@{/updateResume}" method="post" th:object="${memberResume}">
+					<input type="hidden" th:field="*{resumeId}">
 					<input type="hidden" th:field="*{memberId}">
 					<div class="row mt-1">
 						<div class="col-2">

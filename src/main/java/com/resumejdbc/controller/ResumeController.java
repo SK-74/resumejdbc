@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.resumejdbc.entity.Member;
+import com.resumejdbc.entity.MemberResume;
 import com.resumejdbc.entity.Resume;
 import com.resumejdbc.service.MemberService;
 import com.resumejdbc.service.ResumeService;
@@ -57,7 +58,8 @@ public class ResumeController {
 			model.addAttribute("resumes", resumes);
 			model.addAttribute("age", this.memberSvc.getAge(member.getId()));
 		}catch(Exception ex) {
-			//例外の始末をする
+			ex.printStackTrace();
+			//メッセージを画面表示する
 			model.addAttribute("errmsg", ex.getMessage());
 			//空の情報を渡す
 			model.addAttribute("member", new Member());
@@ -85,7 +87,8 @@ public class ResumeController {
 			model.addAttribute("member", member);
 			model.addAttribute("resume", resume);
 		}catch(Exception ex) {
-			//例外の始末をする
+			ex.printStackTrace();
+			//メッセージを画面表示する
 			model.addAttribute("errmsg", ex.getMessage());
 			//空の情報を渡す
 			model.addAttribute("member", new Member());
@@ -117,7 +120,8 @@ public class ResumeController {
 				return "newResume";
 			}
 		}catch(Exception ex) {
-			//例外の始末をする
+			ex.printStackTrace();
+			//メッセージを画面表示する
 			model.addAttribute("errmsg", ex.getMessage());
 			//空の情報を渡す
 			model.addAttribute("member", new Member());
@@ -137,18 +141,15 @@ public class ResumeController {
 	@GetMapping("/editResume")
 	public String editResume(@RequestParam(name="id") Integer id, Model model){
 		try {
-			Resume resume = this.resumeSvc.findById(id);
+			MemberResume memberResume = this.resumeSvc.findWithMemberById(id);
 	
-			Member member = this.memberSvc.findById(resume.getMemberId());
-	
-			model.addAttribute("member", member);
-			model.addAttribute("resume", resume);
+			model.addAttribute("memberResume", memberResume);
 		}catch(Exception ex) {
-			//例外の始末をする
+			ex.printStackTrace();
+			//メッセージを画面表示する
 			model.addAttribute("errmsg", ex.getMessage());
 			//空の情報を渡す
-			model.addAttribute("member", new Member());
-			model.addAttribute("resume", new Resume());
+			model.addAttribute("memberResume", new MemberResume());
 		}
 		
 		return "editResume";
@@ -163,7 +164,7 @@ public class ResumeController {
 	 * @return
 	 */
 	@PostMapping("/updateResume")
-	public String updateResume(@Validated @ModelAttribute("resume") Resume request,
+	public String updateResume(@Validated @ModelAttribute("memberResume") MemberResume request,
 			BindingResult validResult, Model model, RedirectAttributes redirectAttrs) {
 
 		try {
@@ -171,15 +172,15 @@ public class ResumeController {
 				resumeSvc.updateResume(request);
 			}else {
 				//元の画面にメンバー名を表示させるために設定する
-				Member member = this.memberSvc.findById(request.getMemberId());
-				model.addAttribute("member", member);
+				model.addAttribute("memberResume", request);
 				return "editResume";
 			}
 		}catch(Exception ex) {
-			//例外の始末をする
+			ex.printStackTrace();
+			//メッセージを画面表示する
 			model.addAttribute("errmsg", ex.getMessage());
 			//空の情報を渡す
-			model.addAttribute("member", new Member());
+			model.addAttribute("memberResume", new MemberResume());
 			return "editResume";
 		}
 
@@ -204,7 +205,8 @@ public class ResumeController {
 	
 			redirectAttrs.addAttribute("id", resume.getMemberId());
 		}catch(Exception ex) {
-			//例外の始末をする
+			ex.printStackTrace();
+			//メッセージを画面表示する
 			model.addAttribute("errmsg", ex.getMessage());
 		}
 		return "redirect:/resumeList";

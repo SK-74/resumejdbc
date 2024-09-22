@@ -57,15 +57,6 @@ public class MemberService {
 		}
 		return ageStr;
 	}
-	
-	/**
-	 * 全検索
-	 * @return
-	 * @throws Exception
-	 */
-	public List<Member> findAll() throws Exception {
-		return this.memberRepo.findAll();
-	}
 
 	/**
 	 * 誕生日を条件に会員を検索する

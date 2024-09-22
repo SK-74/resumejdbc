@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.resumejdbc.entity.MemberResume;
 import com.resumejdbc.entity.Resume;
 
 @Repository
@@ -34,7 +35,7 @@ public class ResumeJdbcRepository {
 		
 		// 種別、年、月で並べ替えて検索する
 		List<Resume> resumes = template.query(
-				"SELECT * FROM resumes WHERE member_id = ? ORDER BY typ, ym",
+				"SELECT id, typ, member_id, ym, content FROM resumes WHERE member_id = ? ORDER BY typ, ym",
 				new BeanPropertyRowMapper<>(Resume.class),
 				args.toArray());
 
@@ -43,7 +44,7 @@ public class ResumeJdbcRepository {
 
 	/**
 	 * IDを検索条件にresumesテーブルを検索する
-	 * @param id
+	 * @param id ID
 	 * @return
 	 * @throws Exception
 	 */
@@ -53,7 +54,7 @@ public class ResumeJdbcRepository {
 		
 		//一つだけ検索されるはずだが、queryメソッドの仕様によりListで受け、後で１件抽出する
 		List<Resume> resumes = template.query(
-				"SELECT * FROM resumes WHERE id = ?",
+				"SELECT id, typ, member_id, ym, content FROM resumes WHERE id = ?",
 				new BeanPropertyRowMapper<>(Resume.class),
 				args.toArray());
 		
@@ -62,6 +63,44 @@ public class ResumeJdbcRepository {
 			resume = resumes.getFirst();
 		}
 		return resume;
+	}
+
+	/**
+	 * 経歴と紐づく会員を検索する
+	 * @param id ID
+	 * @return
+	 * @throws Exception
+	 */
+	public MemberResume findWithMemberById(Integer id) throws Exception {
+		List<Object> args = new ArrayList<>();
+		//プレースホルダの設定
+		args.add(id);
+		//経歴と紐づく会員の取得
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT");
+		sb.append("   mem.name");
+		sb.append("   , mem.id AS member_id");
+		sb.append("   , res.id AS resume_id");
+		sb.append("   , res.typ");
+		sb.append("   , res.ym");
+		sb.append("   , res.content");
+		sb.append(" FROM resumes res");
+		sb.append("   INNER JOIN members mem ON");
+		sb.append("   res.member_id = mem.id");
+		sb.append(" WHERE");
+		sb.append("   res.id = ?");
+		List<MemberResume> memberResumes = template.query(
+				sb.toString(),
+				new BeanPropertyRowMapper<>(MemberResume.class), //戻り値の型
+				args.toArray());
+		
+		MemberResume memberResume = new MemberResume();
+		if(memberResumes.size() > 0) {
+			// id検索なので1件しかないはず
+			memberResume = memberResumes.getFirst();
+		}
+
+		return memberResume;
 	}
 	
 	/**
@@ -86,13 +125,13 @@ public class ResumeJdbcRepository {
 	 * @param resume 経歴エンティティ
 	 * @throws Exception
 	 */
-	public void update(Resume resume) throws Exception {
+	public void update(MemberResume resume) throws Exception {
 		List<Object> args = new ArrayList<>();
 		//更新
 		args.add(resume.getTyp());
 		args.add(resume.getYm());
 		args.add(resume.getContent());
-		args.add(resume.getId());
+		args.add(resume.getResumeId());
 		template.update(
 				"UPDATE resumes SET typ = ?, ym = ?, content = ? WHERE id = ?",
 				args.toArray());

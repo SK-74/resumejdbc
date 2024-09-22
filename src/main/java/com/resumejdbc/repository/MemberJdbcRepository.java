@@ -23,19 +23,6 @@ public class MemberJdbcRepository {
 	public MemberJdbcRepository(JdbcTemplate template) {
 		this.template = template;
 	}
-
-	/**
-	 * membersテーブルの全件検索
-	 * @return　検索結果
-	 * @throws Exception
-	 */
-	public List<Member> findAll() throws Exception{
-		List<Member> members =  template.query(
-				"SELECT * FROM members ORDER BY id",
-				new BeanPropertyRowMapper<>(Member.class) //戻り値の型
-				);
-		return members;
-	}
 	
 	/**
 	 * 誕生日を条件にmembersテーブルを検索
@@ -48,10 +35,9 @@ public class MemberJdbcRepository {
 		List<Object> args = new ArrayList<>();
 		
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT * FROM members");
+		sql.append("SELECT id, name, birth, email FROM members");
 		if(Objects.nonNull(from) && Objects.nonNull(to)) {
-			sql.append(" WHERE birth >= ?");
-			sql.append(" AND birth <= ?");
+			sql.append(" WHERE birth BETWEEN ? AND ?");
 			//プレースホルダの設定
 			args.add(from);
 			args.add(to);
@@ -85,11 +71,15 @@ public class MemberJdbcRepository {
 		//プレースホルダの設定
 		args.add(id);
 		List<Member> members = template.query(
-				"SELECT * FROM members WHERE id = ?",
+				"SELECT id, name, birth, email FROM members WHERE id = ?",
 				new BeanPropertyRowMapper<>(Member.class), //戻り値の型
 				args.toArray());
-		// id検索なので1件しかないはず
-		Member member = members.get(0);
+		
+		Member member = new Member();
+		if(members.size() > 0) {
+			// id検索なので1件しかないはず
+			member = members.getFirst();
+		}
 
 		return member;
 	}

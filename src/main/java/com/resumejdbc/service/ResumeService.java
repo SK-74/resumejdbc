@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.resumejdbc.convertor.LocalDate2YearMonthConvertor;
 import com.resumejdbc.convertor.YearMonth2DateConvertor;
+import com.resumejdbc.entity.MemberResume;
 import com.resumejdbc.entity.Resume;
 import com.resumejdbc.repository.ResumeJdbcRepository;
 
@@ -50,6 +51,21 @@ public class ResumeService {
 	}
 
 	/**
+	 * 経歴＋会員検索
+	 * @param id ID
+	 * @return
+	 * @throws Exception
+	 */
+	public MemberResume findWithMemberById(Integer id) throws Exception {
+		MemberResume memberResume = this.resumeRepo.findWithMemberById(id);
+		//DBから取得した年月を画面用に型変換する
+		LocalDate2YearMonthConvertor convertor = new LocalDate2YearMonthConvertor();
+		memberResume.setRequestYm(convertor.convert(memberResume.getYm()));
+		
+		return memberResume;
+	}
+	
+	/**
 	 * 経歴追加
 	 * @param resume 経歴エンティティ
 	 * @throws Exception
@@ -69,7 +85,7 @@ public class ResumeService {
 	 * @throws Exception
 	 */
 	@Transactional
-	public void updateResume(Resume resume) throws Exception {
+	public void updateResume(MemberResume resume) throws Exception {
 		//画面からもらった年月をDB用に型変換する
 		YearMonth2DateConvertor convertor = new YearMonth2DateConvertor();
 		resume.setYm(convertor.convert(resume.getRequestYm()));

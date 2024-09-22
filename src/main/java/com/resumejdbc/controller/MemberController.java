@@ -52,8 +52,9 @@ public class MemberController {
 	public String memberList(@ModelAttribute("criteria") MemberSearchCriteria criteria, Model model) {
 		
 		//HTTPセッションに保存していた情報を削除する
-		session.removeAttribute("dateFrom");
-		session.removeAttribute("dateTo");
+		this.session.removeAttribute("dateFrom");
+		this.session.removeAttribute("dateTo");
+		this.session.removeAttribute("isSearch");
 
 		return "memberList";
 	}
@@ -71,9 +72,9 @@ public class MemberController {
 
 		if(! validResult.hasErrors()) {
 			//検索条件をHTTPセッションに保持する
-			session.setAttribute("dateFrom", criteria.getDateFrom());
-			session.setAttribute("dateTo", criteria.getDateTo());
-			session.setAttribute("isSearch", true);
+			this.session.setAttribute("dateFrom", criteria.getDateFrom());
+			this.session.setAttribute("dateTo", criteria.getDateTo());
+			this.session.setAttribute("isSearch", true);
 
 			//検索条件を画面に再表示するためにmodelに設定する
 			model.addAttribute("dateFrom", criteria.getDateFrom());
@@ -85,7 +86,8 @@ public class MemberController {
 				members = this.memberSvc.findByBirth(criteria);
 				model.addAttribute("members", members);
 			}catch(Exception ex) {
-				//例外の始末をする
+				ex.printStackTrace();
+				//メッセージを画面表示する
 				model.addAttribute("errmsg", ex.getMessage());
 				//空の情報を渡す
 				model.addAttribute("members", new ArrayList<Member>());
@@ -116,7 +118,7 @@ public class MemberController {
 	 */
 	@PostMapping("/insertMember")
 	public String insertMember(@Validated @ModelAttribute("member") Member request, 
-			BindingResult validResult, Model model) {
+			BindingResult validResult, Model model, RedirectAttributes redirectAttributes) {
 
 		if(! validResult.hasErrors()) {
 			try {
@@ -128,15 +130,23 @@ public class MemberController {
 					return "newMember";
 				}
 			}catch(Exception ex) {
-				//例外の始末をする
+				ex.printStackTrace();
+				//メッセージを画面表示する
 				model.addAttribute("errmsg", ex.getMessage());
 				return "newMember";
 			}
 		}else {
 			return "newMember";
 		}
+
+		//セッションに保存していた情報を取り出す
+		String strFrom = this.getSearchParamFromSession("dateFrom");
+		String strTo = this.getSearchParamFromSession("dateTo");
+		//取り出した検索条件をクエリパラメータに関連付けする
+		redirectAttributes.addAttribute("dateFrom", strFrom);
+		redirectAttributes.addAttribute("dateTo", strTo);
 		
-		return "redirect:/backToMemberList";
+		return "redirect:/searchMember";
 	}
 	
 	/**
@@ -153,7 +163,8 @@ public class MemberController {
 			//初期表示するためにModelにmemberを設定する
 			model.addAttribute("member", member);
 		}catch(Exception ex) {
-			//例外の始末をする
+			ex.printStackTrace();
+			//メッセージを画面表示する
 			model.addAttribute("errmsg", ex.getMessage());
 			//空の情報を渡す
 			model.addAttribute("member", new Member());
@@ -171,7 +182,7 @@ public class MemberController {
 	 */
 	@PostMapping("/updateMember")
 	public String updateMember(@Validated @ModelAttribute("member") Member request, 
-			BindingResult validResult, Model model) {
+			BindingResult validResult, Model model, RedirectAttributes redirectAttributes) {
 
 		if(! validResult.hasErrors()) {
 			try {
@@ -182,7 +193,8 @@ public class MemberController {
 					return "newMember";
 				}
 			}catch(Exception ex) {
-				//例外の始末をする
+				ex.printStackTrace();
+				//メッセージを画面表示する
 				model.addAttribute("errmsg", ex.getMessage());
 				return "newMember";
 			}
@@ -190,7 +202,14 @@ public class MemberController {
 			return "newMember";
 		}
 
-		return "redirect:/backToMemberList";
+		//セッションに保存していた情報を取り出す
+		String strFrom = this.getSearchParamFromSession("dateFrom");
+		String strTo = this.getSearchParamFromSession("dateTo");
+		//取り出した検索条件をクエリパラメータに関連付けする
+		redirectAttributes.addAttribute("dateFrom", strFrom);
+		redirectAttributes.addAttribute("dateTo", strTo);
+		
+		return "redirect:/searchMember";
 	}
 	
 	/**
@@ -201,16 +220,26 @@ public class MemberController {
 	 * @return
 	 */
 	@PostMapping("/deleteMember")
-	public String deleteMember(@RequestParam("id") Integer id, Model model, RedirectAttributes redirectAttributes) {
+	public String deleteMember(@RequestParam("id") Integer id, Model model, 
+			RedirectAttributes redirectAttributes) {
 
 		try {
 			memberSvc.deleteMember(id);
 		}catch(Exception ex) {
-			//例外の始末をする(リダイレクト先のModelに情報を引き継ぐ)
+			ex.printStackTrace();
+			//メッセージを画面表示する(リダイレクト先のModelに情報を引き継ぐ)
 			redirectAttributes.addFlashAttribute("errmsg", ex.getMessage());
 		}
 
-		return "redirect:/backToMemberList";
+		//会員一覧の再読み込みを実施
+		//セッションに保存していた情報を取り出す
+		String strFrom = this.getSearchParamFromSession("dateFrom");
+		String strTo = this.getSearchParamFromSession("dateTo");
+		//取り出した検索条件をクエリパラメータに関連付けする
+		redirectAttributes.addAttribute("dateFrom", strFrom);
+		redirectAttributes.addAttribute("dateTo", strTo);
+		
+		return "redirect:/searchMember";
 	}
 
 	/**
@@ -228,31 +257,51 @@ public class MemberController {
 			return "redirect:/";
 		}
 
-		//HTTPセッションに保存していた検索条件を取り出す
-		LocalDate from = (LocalDate) session.getAttribute("dateFrom");
-		LocalDate to = (LocalDate) session.getAttribute("dateTo");
-
-		//クエリパラメータに関連付けするにあたって指定なしなら空の文字列に変換すること
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		String strFrom = "";
-		if(Objects.nonNull(from)) {
-			strFrom = from.format(formatter);
-		}
-		String strTo = "";
-		if(Objects.nonNull(to)) {
-			strTo = to.format(formatter);
-		}
+		//セッションに保存していた情報を取り出す
+		String strFrom = this.getSearchParamFromSession("dateFrom");
+		String strTo = this.getSearchParamFromSession("dateTo");
 
 		//取り出した検索条件をクエリパラメータに関連付けする
 		redirectAttributes.addAttribute("dateFrom", strFrom);
 		redirectAttributes.addAttribute("dateTo", strTo);
-		if(Objects.nonNull(model.getAttribute("errmsg"))) {
-			//Modelに情報を引き継ぐ
-			redirectAttributes.addFlashAttribute("errmsg", model.getAttribute("errmsg"));
-		}
 		
 		//クエリパラメータ付きのURLでリダイレクトする
-		return "redirect:/searchMember?dateFrom={dateFrom}&dateTo={dateTo}";
+		return "redirect:/searchMember";
 	}
 	
+	/**
+	 * セッションに保存している検索条件を取り出す
+	 * @param key キー
+	 * @return
+	 */
+	private String getSearchParamFromSession(String key) {
+		//HTTPセッションに保存していた検索条件を取り出す
+		LocalDate item = (LocalDate) this.getSessionAttr(key);
+		//クエリパラメータに関連付けするにあたってフォーマット
+		return this.formatDate("yyyy-MM-dd", item);
+	}
+	
+	/**
+	 * セッションに保存している情報を取得する
+	 * @param key キー
+	 * @return
+	 */
+	private Object getSessionAttr(String key) {
+		return this.session.getAttribute(key);
+	}
+	
+	/**
+	 * 日時を指定された文字形式で返す
+	 * @param pattern 形式
+	 * @param dt 日時
+	 * @return
+	 */
+	private String formatDate(String pattern, LocalDate dt) {
+		String str = "";
+		if(Objects.nonNull(dt)) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+			str = dt.format(formatter);
+		}		
+		return str;
+	}
 }
