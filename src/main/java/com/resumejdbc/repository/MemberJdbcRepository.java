@@ -35,21 +35,21 @@ public class MemberJdbcRepository {
 		List<Object> args = new ArrayList<>();
 		
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT id, name, birth, email FROM members");
-		if(Objects.nonNull(from) && Objects.nonNull(to)) {
-			sql.append(" WHERE birth BETWEEN ? AND ?");
+		//以降のif文を満たした時にANDで繋ぐために「WHERE 1=1」を使う(他の条件に影響は与えない)
+		sql.append("SELECT id, name, birth, email FROM members WHERE 1=1");
+		
+		//from-toの両方が指定された場合は「birth BETWEEN ? AND ?」と同じ意味になる
+		if(Objects.nonNull(from)) {
+			sql.append(" AND birth >= ?");
 			//プレースホルダの設定
 			args.add(from);
-			args.add(to);
-		}else if(Objects.nonNull(from)) {
-			sql.append(" WHERE birth >= ?");
-			//プレースホルダの設定
-			args.add(from);
-		}else if(Objects.nonNull(to)) {
-			sql.append(" WHERE birth <= ?");
+		}
+		if(Objects.nonNull(to)) {
+			sql.append(" AND birth <= ?");
 			//プレースホルダの設定
 			args.add(to);
 		}
+		
 		sql.append(" ORDER BY id");
 		
 		List<Member> members = template.query(
