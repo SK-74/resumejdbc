@@ -66,7 +66,7 @@ public class MemberJdbcRepository {
 	 * @return　検索結果
 	 * @throws Exception
 	 */
-	public Member findById(Integer id) throws Exception {
+	public Member findById(Long id) throws Exception {
 		List<Object> args = new ArrayList<>();
 		//プレースホルダの設定
 		args.add(id);
@@ -91,7 +91,7 @@ public class MemberJdbcRepository {
 	 * @return 件数
 	 * @throws Exception
 	 */
-	public long countByEmail(String email, Integer excludeId) throws Exception {
+	public long countByEmail(String email, Long excludeId) throws Exception {
 		List<Object> args = new ArrayList<>();
 		
 		StringBuilder sql = new StringBuilder();
@@ -150,7 +150,7 @@ public class MemberJdbcRepository {
 	 * @param id ID
 	 * @throws Exception
 	 */
-	public void delete(Integer id) throws Exception {
+	public void delete(Long id) throws Exception {
 		List<Object> args = new ArrayList<>();
 		//削除
 		args.add(id);

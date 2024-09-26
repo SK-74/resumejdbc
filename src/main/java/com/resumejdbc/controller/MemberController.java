@@ -156,7 +156,7 @@ public class MemberController {
 	 * @return
 	 */
 	@GetMapping("/editMember")
-	public String editMember(@RequestParam("id") Integer id, Model model) {
+	public String editMember(@RequestParam("id") Long id, Model model) {
 		try {
 			Member member = this.memberSvc.findById(id);
 			
@@ -220,7 +220,7 @@ public class MemberController {
 	 * @return
 	 */
 	@PostMapping("/deleteMember")
-	public String deleteMember(@RequestParam("id") Integer id, Model model, 
+	public String deleteMember(@RequestParam("id") Long id, Model model, 
 			RedirectAttributes redirectAttributes) {
 
 		try {

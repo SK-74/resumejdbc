@@ -29,7 +29,7 @@ public class ResumeJdbcRepository {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Resume> findByMemberId(Integer id) throws Exception {
+	public List<Resume> findByMemberId(Long id) throws Exception {
 		List<Object> args = new ArrayList<>();
 		args.add(id);
 		
@@ -48,7 +48,7 @@ public class ResumeJdbcRepository {
 	 * @return
 	 * @throws Exception
 	 */
-	public Resume findById(Integer id) throws Exception {
+	public Resume findById(Long id) throws Exception {
 		List<Object> args = new ArrayList<>();
 		args.add(id);
 		
@@ -71,7 +71,7 @@ public class ResumeJdbcRepository {
 	 * @return
 	 * @throws Exception
 	 */
-	public MemberResume findWithMemberById(Integer id) throws Exception {
+	public MemberResume findWithMemberById(Long id) throws Exception {
 		List<Object> args = new ArrayList<>();
 		//プレースホルダの設定
 		args.add(id);
@@ -142,7 +142,7 @@ public class ResumeJdbcRepository {
 	 * @param id ID
 	 * @throws Exception
 	 */
-	public void delete(Integer id) throws Exception {
+	public void delete(Long id) throws Exception {
 		List<Object> args = new ArrayList<>();
 		//削除
 		args.add(id);
@@ -156,7 +156,7 @@ public class ResumeJdbcRepository {
 	 * @param memberId 会員ID
 	 * @throws Exception
 	 */
-	public void deleteByMemberId(Integer memberId) throws Exception {
+	public void deleteByMemberId(Long memberId) throws Exception {
 		List<Object> args = new ArrayList<>();
 		//削除
 		args.add(memberId);

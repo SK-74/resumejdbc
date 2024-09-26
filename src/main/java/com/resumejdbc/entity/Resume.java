@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
 public class Resume {
 
 	/** ID */
-	private Integer id;
+	private Long id;
 	
 	/** 種別（学歴・職歴） */
 	private Integer typ;
@@ -27,13 +27,13 @@ public class Resume {
 	private String content;
 
 	/** member.id*/
-	private Integer memberId;
+	private Long memberId;
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -69,11 +69,11 @@ public class Resume {
 		this.content = content;
 	}
 
-	public Integer getMemberId() {
+	public Long getMemberId() {
 		return memberId;
 	}
 
-	public void setMemberId(Integer memberId) {
+	public void setMemberId(Long memberId) {
 		this.memberId = memberId;
 	}
 	

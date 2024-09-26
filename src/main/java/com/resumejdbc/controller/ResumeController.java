@@ -46,7 +46,7 @@ public class ResumeController {
 	 * @return
 	 */
 	@GetMapping("/resumeList")
-	public String resumeList(@RequestParam(name="id") Integer id, Model model){
+	public String resumeList(@RequestParam(name="id") Long id, Model model){
 		try {
 			Member member = this.memberSvc.findById(id);
 			List<Resume> resumes = new ArrayList<>();
@@ -76,7 +76,7 @@ public class ResumeController {
 	 * @return
 	 */
 	@GetMapping("/newResume")
-	public String newResume(@RequestParam(name="id") Integer id, Model model){
+	public String newResume(@RequestParam(name="id") Long id, Model model){
 		//初期表示用（hidden項目）の会員IDを設定する
 		Resume resume = new Resume();
 		resume.setMemberId(id);
@@ -139,7 +139,7 @@ public class ResumeController {
 	 * @return
 	 */
 	@GetMapping("/editResume")
-	public String editResume(@RequestParam(name="id") Integer id, Model model){
+	public String editResume(@RequestParam(name="id") Long id, Model model){
 		try {
 			MemberResume memberResume = this.resumeSvc.findWithMemberById(id);
 	
@@ -196,7 +196,7 @@ public class ResumeController {
 	 * @return
 	 */
 	@PostMapping("/deleteResume")
-	public String deleteResume(@RequestParam(name="id") Integer id, Model model, RedirectAttributes redirectAttrs) {
+	public String deleteResume(@RequestParam(name="id") Long id, Model model, RedirectAttributes redirectAttrs) {
 		try {
 			//redirect時にメンバーIDが必要なので削除前にresumeを取得
 			Resume resume = this.resumeSvc.findById(id);

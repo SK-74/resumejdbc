@@ -6,13 +6,13 @@ import java.time.YearMonth;
 public class MemberResume {
 
 	/** ID（メンバーID） */
-	private Integer memberId;
+	private Long memberId;
 	
 	/** 名前 */
 	private String name;
 
 	/** ID（経歴ID） */
-	private Integer resumeId;
+	private Long resumeId;
 
 	/** 種別（学歴・職歴） */
 	private Integer typ;
@@ -26,11 +26,11 @@ public class MemberResume {
 	/** 経歴 */
 	private String content;
 
-	public Integer getMemberId() {
+	public Long getMemberId() {
 		return memberId;
 	}
 
-	public void setMemberId(Integer memberId) {
+	public void setMemberId(Long memberId) {
 		this.memberId = memberId;
 	}
 
@@ -42,11 +42,11 @@ public class MemberResume {
 		this.name = name;
 	}
 
-	public Integer getResumeId() {
+	public Long getResumeId() {
 		return resumeId;
 	}
 
-	public void setResumeId(Integer resumeId) {
+	public void setResumeId(Long resumeId) {
 		this.resumeId = resumeId;
 	}
 

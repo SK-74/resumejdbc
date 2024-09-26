@@ -31,7 +31,7 @@ public class ResumeService {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Resume> findByMemberId(Integer id) throws Exception {
+	public List<Resume> findByMemberId(Long id) throws Exception {
 		return this.resumeRepo.findByMemberId(id);
 	}
 
@@ -41,7 +41,7 @@ public class ResumeService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Resume findById(Integer id) throws Exception {
+	public Resume findById(Long id) throws Exception {
 		Resume resume = this.resumeRepo.findById(id);
 		//DBから取得した年月を画面用に型変換する
 		LocalDate2YearMonthConvertor convertor = new LocalDate2YearMonthConvertor();
@@ -56,7 +56,7 @@ public class ResumeService {
 	 * @return
 	 * @throws Exception
 	 */
-	public MemberResume findWithMemberById(Integer id) throws Exception {
+	public MemberResume findWithMemberById(Long id) throws Exception {
 		MemberResume memberResume = this.resumeRepo.findWithMemberById(id);
 		//DBから取得した年月を画面用に型変換する
 		LocalDate2YearMonthConvertor convertor = new LocalDate2YearMonthConvertor();
@@ -99,7 +99,7 @@ public class ResumeService {
 	 * @throws Exception
 	 */
 	@Transactional
-	public void deleteResume(Integer id) throws Exception {
+	public void deleteResume(Long id) throws Exception {
 		this.resumeRepo.delete(id);
 	}
 

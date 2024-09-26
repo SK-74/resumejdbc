@@ -45,7 +45,7 @@ public class MemberService {
 	 * @return
 	 * @throws Exception
 	 */
-	public String getAge(Integer id) throws Exception {
+	public String getAge(Long id) throws Exception {
 		LocalDate today = LocalDate.now();
 		Member member = this.findById(id);
 		
@@ -74,7 +74,7 @@ public class MemberService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Member findById(Integer id) throws Exception {
+	public Member findById(Long id) throws Exception {
 		return this.memberRepo.findById(id);
 	}
 	
@@ -130,7 +130,7 @@ public class MemberService {
 	 * @throws Exception
 	 */
 	@Transactional
-	public void deleteMember(Integer id) throws Exception {
+	public void deleteMember(Long id) throws Exception {
 		this.resumeRepo.deleteByMemberId(id);
 		this.memberRepo.delete(id);
 	}
