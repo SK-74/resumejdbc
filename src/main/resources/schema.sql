@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS members(
 
 CREATE TABLE IF NOT EXISTS resumes(
 	id 			BIGINT 		PRIMARY KEY AUTO_INCREMENT ,
-	typ 		INT 		NOT NULL,
 	member_id 	INT 		NOT NULL,
+	typ 		INT 		NOT NULL,
 	ym 			DATE 		NOT NULL,
 	content 	VARCHAR 	NOT NULL
 );
