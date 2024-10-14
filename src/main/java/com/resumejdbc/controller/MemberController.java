@@ -146,7 +146,7 @@ public class MemberController {
 		redirectAttributes.addAttribute("dateFrom", strFrom);
 		redirectAttributes.addAttribute("dateTo", strTo);
 		
-		return "redirect:/backToMemberList";
+		return "redirect:/searchMember";
 	}
 	
 	/**
