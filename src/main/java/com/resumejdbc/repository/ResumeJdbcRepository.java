@@ -52,16 +52,12 @@ public class ResumeJdbcRepository {
 		List<Object> args = new ArrayList<>();
 		args.add(id);
 		
-		//一つだけ検索されるはずだが、queryメソッドの仕様によりListで受け、後で１件抽出する
-		List<Resume> resumes = template.query(
+		//一つだけ検索される
+		Resume resume = template.queryForObject(
 				"SELECT id, typ, member_id, ym, content FROM resumes WHERE id = ?",
-				new BeanPropertyRowMapper<>(Resume.class),
+				Resume.class,
 				args.toArray());
-		
-		Resume resume = new Resume();
-		if(resumes.size() > 0) {
-			resume = resumes.getFirst();
-		}
+
 		return resume;
 	}
 

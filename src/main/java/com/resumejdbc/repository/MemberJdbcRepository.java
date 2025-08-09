@@ -70,16 +70,10 @@ public class MemberJdbcRepository {
 		List<Object> args = new ArrayList<>();
 		//プレースホルダの設定
 		args.add(id);
-		List<Member> members = template.query(
+		Member member = template.queryForObject(
 				"SELECT id, name, birth, email FROM members WHERE id = ?",
 				new BeanPropertyRowMapper<>(Member.class), //戻り値の型
 				args.toArray());
-		
-		Member member = new Member();
-		if(members.size() > 0) {
-			// id検索なので1件しかないはず
-			member = members.getFirst();
-		}
 
 		return member;
 	}
